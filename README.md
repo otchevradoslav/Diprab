@@ -1,4 +1,4 @@
-# NodejsShop - Full Stack E-Commerce Application
+# Diprab - Full Stack E-Commerce Application
 
 A complete, lightweight e-commerce solution built with Node.js, Express, TypeScript, and MySQL. This project features a public-facing shop with a shopping cart and checkout system, as well as a comprehensive admin panel for managing products, categories, and orders.
 
@@ -27,7 +27,7 @@ Follow these steps to set up and run the system locally.
 1.  **Clone the Repository**
     ```bash
     git clone <repository-url>
-    cd NodejsShop
+    cd Diprab
     ```
 
 2.  **Install Dependencies**
