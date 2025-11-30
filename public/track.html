@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проследяване на поръчка | Врати</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="/" class="logo">Врати.</a>
+                <div class="nav-links">
+                    <a href="/">Начало</a>
+                    <a href="/track.html">Проследяване</a>
+                    <a href="/cart.html" class="cart-icon">
+                        🛒
+                        <span class="cart-count" id="cart-count">0</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2 class="section-title">Проследяване на поръчка</h2>
+
+        <div class="checkout-form">
+            <form id="track-form">
+                <div class="form-group">
+                    <label for="code">Код на поръчка</label>
+                    <input type="text" id="code" name="code" class="form-control" placeholder="ORD-..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Имейл адрес</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Проследи</button>
+            </form>
+        </div>
+
+        <div id="order-details" class="mt-2" style="display: none;">
+            <div class="cart-summary">
+                <h3>Статус на поръчка: <span id="order-status" style="color: var(--accent-color)"></span></h3>
+                <p><strong>Дата:</strong> <span id="order-date"></span></p>
+                <p><strong>Общо:</strong> <span id="order-total"></span></p>
+
+                <div class="mt-1">
+                    <h4>Артикули:</h4>
+                    <ul id="order-items-list"></ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Врати Inc. Всички права запазени.</p>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const codeParam = urlParams.get('code');
+            const emailParam = urlParams.get('email');
+
+            if (codeParam) document.getElementById('code').value = codeParam;
+            if (emailParam) document.getElementById('email').value = emailParam;
+
+            if (codeParam && emailParam) {
+                trackOrder(codeParam, emailParam);
+            }
+
+            document.getElementById('track-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const code = document.getElementById('code').value;
+                const email = document.getElementById('email').value;
+                trackOrder(code, email);
+            });
+        });
+
+        async function trackOrder(code, email) {
+            try {
+                const res = await fetch(`/api/orders/track?code=${code}&email=${email}`);
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('order-details').style.display = 'block';
+
+                    document.getElementById('order-status').innerText = data.status.toUpperCase();
+                    document.getElementById('order-date').innerText =
+                        new Date(data.created_at).toLocaleString('bg-BG');
+
+                    document.getElementById('order-total').innerText =
+                        Number(data.total).toFixed(2) + ' лв.';
+
+                    const list = document.getElementById('order-items-list');
+
+                    list.innerHTML = data.items.map(item => `
+                        <li>${item.title_snapshot} x ${item.qty} — ${Number(item.price).toFixed(2)} лв.</li>
+                    `).join('');
+
+                } else {
+                    alert('Грешка: ' + data.error);
+                    document.getElementById('order-details').style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert('Грешка при проследяване на поръчката.');
+            }
+        }
+    </script>
+
+</body>
+
+</html>
